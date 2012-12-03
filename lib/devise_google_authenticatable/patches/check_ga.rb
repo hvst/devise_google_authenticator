@@ -25,6 +25,16 @@ module DeviseGoogleAuthenticator::Patches
         end
 
       end
+
+      def checkga_path_for(resource_or_scope, opts = {})
+        scope = Devise::Mapping.find_scope!(resource_or_scope)
+        scoped_path = "#{scope}_checkga_path"
+        if respond_to?(scoped_path, true)
+          send(scoped_path, opts)
+        else
+          user_checkga_path(opts)
+        end
+      end
       
     end
   end
