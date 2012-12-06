@@ -11,7 +11,7 @@ module DeviseGoogleAuthenticator::Patches
 
         resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new")
 
-        if resource.respond_to?(:get_qr) and resource.gauth_enabled.to_i != 0 #Therefore we can quiz for a QR
+        if resource.respond_to?(:get_qr) and resource.gauth_enabled.to_i != 0 and not computer_is_trusted_by?(resource) #Therefore we can quiz for a QR
           tmpid = resource.assign_tmp #assign a temporary key and fetch it
           warden.logout #log the user out
 
@@ -34,6 +34,15 @@ module DeviseGoogleAuthenticator::Patches
         else
           user_checkga_path(opts)
         end
+      end
+
+      def computer_is_trusted_by?(resource)
+        if cookies["trust_this_computer"].present?
+          cookie = cookies["trust_this_computer"]
+          resource.class.serialize_into_cookie(resource) == cookies[:value] and cookie[:expires] > DateTime.now
+        else
+          false
+        end 
       end
       
     end

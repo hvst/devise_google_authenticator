@@ -19,6 +19,7 @@ class Devise::CheckgaController < Devise::SessionsController
       if resource.validate_token(params[resource_name]['token'].to_i)
         set_flash_message(:notice, :signed_in) if is_navigational_format?
         sign_in(resource_name,resource)
+        trust_this_computer(resource) if params[resource_name]['trust_this_computer']
         respond_with resource, :location => after_sign_in_path_for(resource)
       else
         redirect_to :root
@@ -28,4 +29,14 @@ class Devise::CheckgaController < Devise::SessionsController
       redirect_to :root
     end
   end
+
+  protected
+    def trust_this_computer(resource)
+      options = {http_only: true}
+      options.merge!(
+        value: resource.class.serialize_into_cookie(resource),
+        expires: 30.days.from_now
+      )
+      cookies.signed["trust_this_computer"] = options
+    end
 end
