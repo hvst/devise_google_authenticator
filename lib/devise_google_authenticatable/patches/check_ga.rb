@@ -38,8 +38,8 @@ module DeviseGoogleAuthenticator::Patches
 
       def computer_is_trusted_by?(resource)
         if cookies["trust_this_computer"].present?
-          cookie = cookies["trust_this_computer"]
-          resource.class.serialize_into_cookie(resource) == cookies[:value] and cookie[:expires] > DateTime.now
+          cookie = cookies.signed["trust_this_computer"]
+          resource.class.serialize_into_cookie(resource) == cookie
         else
           false
         end 
